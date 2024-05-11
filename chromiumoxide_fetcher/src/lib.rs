@@ -1,4 +1,4 @@
-pub use self::browser::{BrowserFetcher, BrowserFetcherOptions, BrowserFetcherRevisionInfo};
+pub use self::browser::{BrowserFetcher, BrowserFetcherOptions, BrowserFetcherRevisionInfo, BrowserFetcherRuntime};
 pub use self::error::FetcherError;
 pub use self::platform::Platform;
 pub use self::revision::Revision;
