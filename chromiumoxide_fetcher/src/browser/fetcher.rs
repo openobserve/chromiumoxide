@@ -48,6 +48,7 @@ impl BrowserFetcher {
 
     async fn download(&self) -> Result<()> {
         let url = self.platform.download_url(&self.host, &self.revision);
+        println!("Downloading from: {}", url);
         let folder_path = self.folder_path();
         let archive_path = folder_path.with_extension("zip");
 

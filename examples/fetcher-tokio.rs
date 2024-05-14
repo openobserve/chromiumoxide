@@ -7,23 +7,26 @@ use chromiumoxide::fetcher::{BrowserFetcher, BrowserFetcherOptions};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    tokio::fs::canonicalize("/root/chromiumoxide/download").await.expect("download test");
     // Fetcher browser
-    let download_path = Path::new("./download");
-    tokio::fs::create_dir_all(&download_path).await?;
+    let download_path = Path::new("/root/chromiumoxide/download");
+    tokio::fs::create_dir_all(&download_path).await.expect("failed to create download path");
     let fetcher = BrowserFetcher::new(
         BrowserFetcherOptions::builder()
             .with_path(&download_path)
-            .build()?,
+            .build().expect("Failed to build fetcher"),
     );
-    let info = fetcher.fetch().await?;
+    let info = fetcher.fetch().await.expect("faild to fetch the binary");
 
+    println!("executable path {:?}", info.executable_path);
     // Verify browser
     let (mut browser, mut handler) = Browser::launch(
         BrowserConfig::builder()
             .chrome_executable(info.executable_path)
-            .build()?,
+            .arg("--no-sandbox")
+            .build().expect("Get the executable"),
     )
-    .await?;
+    .await.expect("failed to get the browser/handler");
 
     let handle = tokio::task::spawn(async move {
         loop {
@@ -37,9 +40,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     });
 
-    let page = browser.new_page("about:blank").await?;
+    let page = browser.new_page("about:blank").await.expect("new page failed");
 
-    let sum: usize = page.evaluate("1 + 2").await?.into_value()?;
+    let sum: usize = page.evaluate("1 + 2").await?.into_value().expect("evaluate ");
     assert_eq!(sum, 3);
     println!("it worked!");
 

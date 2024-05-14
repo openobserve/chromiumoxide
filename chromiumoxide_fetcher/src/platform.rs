@@ -6,6 +6,7 @@ use crate::Revision;
 #[derive(Clone, Copy, Debug)]
 pub enum Platform {
     Linux,
+    LinuxArm,
     Mac,
     MacArm,
     Win32,
@@ -17,11 +18,18 @@ impl Platform {
         let archive = self.archive_name(revision);
         let name = match self {
             Self::Linux => "Linux_x64",
+            Self::LinuxArm => "Linux_Arm64",
             Self::Mac => "Mac",
             Self::MacArm => "Mac_Arm",
             Self::Win32 => "Win",
             Self::Win64 => "Win_x64",
         };
+
+        if name == "Linux_Arm64" {
+            return "https://playwright.azureedge.net/builds/chromium/1080/chromium-linux-arm64.zip"
+                .into();
+        }
+
         format!(
             "{}/chromium-browser-snapshots/{}/{}/{}.zip",
             host, name, revision, archive
@@ -31,6 +39,7 @@ impl Platform {
     pub(crate) fn archive_name(&self, revision: &Revision) -> String {
         match self {
             Self::Linux => "chrome-linux".to_string(),
+            Self::LinuxArm => "chrome-linux".to_string(),
             Self::Mac | Self::MacArm => "chrome-mac".to_string(),
             Self::Win32 | Self::Win64 => {
                 if revision.0 > 591_479 {
@@ -45,6 +54,7 @@ impl Platform {
     pub(crate) fn folder_name(&self, revision: &Revision) -> String {
         let platform = match self {
             Self::Linux => "linux",
+            Self::LinuxArm => "chrome-linux",
             Self::Mac => "mac",
             Self::MacArm => "mac_arm",
             Self::Win32 => "win32",
@@ -58,6 +68,7 @@ impl Platform {
         path.push(self.archive_name(revision));
         match self {
             Self::Linux => path.push("chrome"),
+            Self::LinuxArm => path.push("chrome"),
             Self::Mac | Self::MacArm => {
                 path.push("Chromium.app");
                 path.push("Contents");
@@ -73,6 +84,8 @@ impl Platform {
         // Currently there are no builds for Linux arm
         if cfg!(all(target_os = "linux", target_arch = "x86_64")) {
             Some(Self::Linux)
+        } else if cfg!(all(target_os = "linux", target_arch = "aarch64")) {
+            Some(Self::LinuxArm)
         } else if cfg!(all(target_os = "macos", target_arch = "x86_64")) {
             Some(Self::Mac)
         } else if cfg!(all(target_os = "macos", target_arch = "aarch64")) {
