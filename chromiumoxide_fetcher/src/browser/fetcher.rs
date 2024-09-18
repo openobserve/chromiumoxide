@@ -50,6 +50,11 @@ impl BrowserFetcher {
         let url = self.platform.download_url(&self.host, &self.revision);
         let folder_path = self.folder_path();
         let archive_path = folder_path.with_extension("zip");
+        println!(
+            "Downloading from: {}, archive: {}",
+            url,
+            archive_path.display()
+        );
 
         BrowserFetcherRuntime::download(&url, &archive_path)
             .await
